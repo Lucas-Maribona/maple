@@ -1,0 +1,34 @@
+# Publish this file as repository.toml on the main branch of
+# https://github.com/Lucas-Maribona/mcxpkgs.
+# Keep one entry per name/version pair; older versions can remain available.
+# maple downloads packages/<name>/<version>.maple automatically.
+
+[[package]]
+name = "hello"
+version = "1.0.0"
+description = "A simple hello-world program"
+
+# Required dependency table for hello, if needed (must match its metadata.toml):
+# [package.dependencies]
+# libc = ">=1.0.0, <2.0.0" # All versions and bounds use ALPM.
+# shell = ">=1.2.0, <2.0.0"
+
+# Mirror all package declarations in the corresponding [[package]] entry.
+# Put config_files and triggers before that entry's table headings.
+# [package.provides]
+# greeting-service = "1.0.0"
+# [package.optional_dependencies]
+# translations = "^1.0"
+# [package.conflicts]
+# other-hello = "*"
+
+# A second available version of the same package:
+[[package]]
+name = "hello"
+version = "1.1.0"
+description = "A simple hello-world program"
+
+# Optional checksums, once at the top level after package entries:
+[sha256]
+# "hello/1.0.0" = "<actual 64-digit SHA-256>"
+# "hello/1.1.0" = "<actual 64-digit SHA-256>"

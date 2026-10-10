@@ -1,0 +1,32 @@
+# Put this file at the archive root, alongside the payload/ directory.
+# Name and version must match the package's entry in repository.toml.
+# All versions use ALPM ordering and are preserved exactly.
+# Examples: "1.0.0", "v2026r10", or "2:1.10-3".
+# Description is optional.
+
+name = "hello"
+version = "1.0.0"
+description = "A simple hello-world program"
+
+# Optional metadata fields (place before any table headings):
+# hooks = ["post-install", "pre-remove"] # Matching files in hooks/; requires --trust-hooks.
+# config_files = ["etc/hello.conf"] # Must exist as a regular payload file.
+# triggers = ["systemd-sysusers", "systemd-tmpfiles", "ldconfig", "initramfs", "systemd"]
+# Offline maintenance requires Bubblewrap on the host and these utilities in the target.
+
+# Required dependencies (must match in package metadata and the repository):
+# [dependencies]
+# libc = ">=1.0.0, <2.0.0" # Legacy ^1.0 expands to these ALPM bounds.
+# shell = ">=1.2.0, <2.0.0"
+
+# Virtual capability versions need not equal the package version:
+# [provides]
+# greeting-service = "1.0.0"
+
+# Optional extras are informational and are not installed automatically:
+# [optional_dependencies]
+# translations = "^1.0"
+
+# Prevent coexistence with matching package or virtual versions:
+# [conflicts]
+# other-hello = "*"

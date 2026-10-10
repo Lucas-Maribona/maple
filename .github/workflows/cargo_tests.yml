@@ -1,0 +1,38 @@
+name: Run cargo tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Run cargo tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential tar xz-utils bubblewrap util-linux
+
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+
+      - name: Check formatting and lints
+        run: |
+          cargo +stable fmt --check
+          cargo +stable clippy --locked --all-targets -- -D warnings
+
+      - name: Run tests
+        run: cargo +stable test --locked --all-targets
