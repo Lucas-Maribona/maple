@@ -1,6 +1,6 @@
-# Maple
+# maple
 
-Mercury Linux’s package manager, written in Rust. Maple installs `.maple` archives into a live system or an alternate filesystem root, resolves dependencies, and journals package changes for recovery and rollback.
+Mercury Linux’s package manager, written in Rust. maple installs `.maple` archives into a live system or an alternate filesystem root, resolves dependencies, and journals package changes for recovery and rollback.
 
 ## Features
 
@@ -44,7 +44,7 @@ From the project directory:
 ```sh
 mkdir -p target/hello/payload/usr/bin
 cp examples/metadata.toml target/hello/metadata.toml
-printf '#!/bin/sh\necho "Hello from Maple!"\n' > target/hello/payload/usr/bin/hello
+printf '#!/bin/sh\necho "Hello from maple!"\n' > target/hello/payload/usr/bin/hello
 chmod +x target/hello/payload/usr/bin/hello
 tar -cJf target/hello-1.0.0.maple -C target/hello metadata.toml payload
 
@@ -69,7 +69,7 @@ This example needs no root privileges, repository, or Bubblewrap because the pac
 | `sudo maple rollback` | Restore the latest retained transaction’s files and package records. |
 | `sudo maple recover` | Undo an interrupted file transaction and retry pending maintenance. |
 
-`install` and `remove` accept multiple packages. Installation, removal, and manual rollback show a plan and ask for confirmation: Enter or `y` accepts; `n` or closed input cancels. `update` uses the same installation confirmation when changes are needed. Maple itself receives updates only when registered as an installed package in the selected root.
+`install` and `remove` accept multiple packages. Installation, removal, and manual rollback show a plan and ask for confirmation: Enter or `y` accepts; `n` or closed input cancels. `update` uses the same installation confirmation when changes are needed. maple itself receives updates only when registered as an installed package in the selected root.
 
 | Global option | Behavior |
 | --- | --- |
@@ -130,7 +130,7 @@ translations = "*"
 other-hello = "*"
 ```
 
-Add only declarations appropriate to the package. Every declared config must exist in the payload, and every declared hook must have a matching script. Optional dependencies are informational; Maple does not install or require them. `provides` values are versions, or `"*"` for an unversioned provision—not version constraints. See [example metadata](examples/metadata.toml).
+Add only declarations appropriate to the package. Every declared config must exist in the payload, and every declared hook must have a matching script. Optional dependencies are informational; maple does not install or require them. `provides` values are versions, or `"*"` for an unversioned provision—not version constraints. See [example metadata](examples/metadata.toml).
 
 Names start with an ASCII letter or digit and otherwise contain only letters, digits, `.`, `_`, `+`, or `-`. Versions are nonempty strings of at most 200 printable ASCII bytes, excluding whitespace, path separators, traversal names, and reserved constraint delimiters. Unknown metadata fields are rejected.
 
@@ -151,7 +151,7 @@ tar --format=pax --numeric-owner --acls --xattrs --xattrs-include='*' \
 
 ### Files and attributes
 
-Maple supports regular files, directories, symlinks, hard links, FIFOs, and character/block devices. Numeric ownership is restored when running as root; otherwise files belong to the installing user. Device creation and privileged attributes require suitable privileges and filesystem support.
+maple supports regular files, directories, symlinks, hard links, FIFOs, and character/block devices. Numeric ownership is restored when running as root; otherwise files belong to the installing user. Device creation and privileged attributes require suitable privileges and filesystem support.
 
 Paths must be UTF-8. Hard links must refer to regular files within the payload. Symlinks may have absolute or dangling targets, but installation never follows directory symlinks. For systems with `/bin -> /usr/bin`, package `usr/bin/tool` directly. Existing unowned files and files owned by another package are not overwritten. File-to-directory or directory-to-file changes require removing the old package first.
 
@@ -159,7 +159,7 @@ Permissions, xattrs, numeric POSIX access/default ACLs, and `security.capability
 
 ### Configuration protection
 
-Declare root-relative regular files in `config_files`; they cannot be hard-linked. Maple stores their original default bytes in the installed record.
+Declare root-relative regular files in `config_files`; they cannot be hard-linked. maple stores their original default bytes in the installed record.
 
 | Current config state | Upgrade behavior |
 | --- | --- |
@@ -175,7 +175,7 @@ Removal and upgrades that drop a config delete unchanged defaults and sidecars b
 
 ### ALPM version rules
 
-**All packages use the same comparator.** Maple preserves version strings and uses ALPM ordering for candidate selection, dependency bounds, conflicts, provisions, and upgrades. It never guesses a version format or sorts versions lexicographically. Numeric components compare by magnitude without integer overflow; epochs, release numbers, alphabetic segments, and separators follow pacman `vercmp` behavior.
+**All packages use the same comparator.** maple preserves version strings and uses ALPM ordering for candidate selection, dependency bounds, conflicts, provisions, and upgrades. It never guesses a version format or sorts versions lexicographically. Numeric components compare by magnitude without integer overflow; epochs, release numbers, alphabetic segments, and separators follow pacman `vercmp` behavior.
 
 ```toml
 name = "example"
@@ -187,13 +187,13 @@ libexample = ">=2:1.9-1, <3:0"
 
 Constraints accept `=`, `<`, `<=`, `>`, `>=`, comma-separated AND conditions, a bare version meaning equality, and `*` meaning unconstrained. The old converter’s `arch:` prefix remains a compatibility alias; new conversions omit it.
 
-ALPM compares pkgrel only when **both** versions contain it. Thus `1.0` compares equal to either `1.0-1` or `1.0-2`, while `1.0-1 < 1.0-2`. This is not a total order. Maple orders candidates by inserting each before the first strictly older candidate, without a lexical tie-break; repository order can matter for equal versions. Keep release-number usage consistent within a package’s history.
+ALPM compares pkgrel only when **both** versions contain it. Thus `1.0` compares equal to either `1.0-1` or `1.0-2`, while `1.0-1 < 1.0-2`. This is not a total order. maple orders candidates by inserting each before the first strictly older candidate, without a lexical tie-break; repository order can matter for equal versions. Keep release-number usage consistent within a package’s history.
 
 CLI pins use **exact string identity**: `install example=1.0-1` selects that entry even if another string compares equal. Pins apply to that operation and are not saved as a future update policy. `update` skips ALPM-equal versions; explicitly install to switch between them.
 
 ### Compatibility with older packages
 
-Packages without newer optional fields remain supported. The retired `version_scheme` field is rejected: remove it from repository entries, archive metadata, and installed records, preserving the version strings. Repack changed archives and regenerate checksums. Finish interrupted transactions with the old binary first. Older rollback snapshots may also contain the field; retain the old binary to restore that history, then migrate restored records before using the new binary. Maple does not rewrite these files automatically.
+Packages without newer optional fields remain supported. The retired `version_scheme` field is rejected: remove it from repository entries, archive metadata, and installed records, preserving the version strings. Repack changed archives and regenerate checksums. Finish interrupted transactions with the old binary first. Older rollback snapshots may also contain the field; retain the old binary to restore that history, then migrate restored records before using the new binary. maple does not rewrite these files automatically.
 
 Explicit legacy SemVer shorthand is translated into ALPM bounds:
 
@@ -220,11 +220,11 @@ The comparator is tested against the [vendored pacman corpus](tests/fixtures/REA
 
 ### How resolution works
 
-Maple plans a compatible final package set **before downloading repository archives**. Explicit versions and supplied local archives are fixed. Unpinned requests prefer newer versions; ordinary installs reuse installed dependencies where possible. Updates consider newer compatible versions without downgrading installed packages, and warn about missing packages or held-back upgrades.
+maple plans a compatible final package set **before downloading repository archives**. Explicit versions and supplied local archives are fixed. Unpinned requests prefer newer versions; ordinary installs reuse installed dependencies where possible. Updates consider newer compatible versions without downgrading installed packages, and warn about missing packages or held-back upgrades.
 
 The resolver follows dependencies recursively and backtracks across versions and providers when constraints or conflicts fail. Versioned provisions satisfy requirements using the provision’s version; an unversioned `"*"` provision only satisfies unconstrained requirements. Missing dependencies prefer a real package, then virtual providers by name. Conflicts are checked in both directions, including virtual names.
 
-All installed package names remain in the solution. Reverse dependencies can require additional package changes, which appear in the plan. Maple never automatically removes packages to solve conflicts. Cycles share a transaction; dependency-first ordering is used where possible, but cycles have no strict ordering. Removing a required package fails unless the final state remains valid—for example, by removing its dependents in the same command.
+All installed package names remain in the solution. Reverse dependencies can require additional package changes, which appear in the plan. maple never automatically removes packages to solve conflicts. Cycles share a transaction; dependency-first ordering is used where possible, but cycles have no strict ordering. Removing a required package fails unless the final state remains valid—for example, by removing its dependents in the same command.
 
 An unsatisfiable plan or the 100,000-branch search limit produces an error. Filesystem ownership conflicts are checked after archive preparation and are not inputs to dependency backtracking.
 
@@ -301,9 +301,9 @@ Completion is recorded durably after each trigger. A crash between execution and
 
 ### Running against an alternate root
 
-With the default root `/`, scripts and maintenance intentionally run on the live system. For another root, Maple uses the host’s **`/usr/bin/bwrap`** and the **target’s** shell and utilities. There is no host-shell or unsandboxed fallback. Install Bubblewrap on the host and ensure the target already contains the shell, libraries, and tools needed by pre-hooks.
+With the default root `/`, scripts and maintenance intentionally run on the live system. For another root, maple uses the host’s **`/usr/bin/bwrap`** and the **target’s** shell and utilities. There is no host-shell or unsandboxed fallback. Install Bubblewrap on the host and ensure the target already contains the shell, libraries, and tools needed by pre-hooks.
 
-The sandbox isolates mount, PID, network, IPC, and UTS namespaces; uses a private `/dev`, read-only `/proc`, empty `/sys`, temporary `/run` and `/tmp`; restricts capabilities; and makes Maple’s database read-only. Runtime mount points must be real directories. Filesystems mounted below the target are rejected if the same device is also mounted outside it. Dedicated target partitions such as `/boot` are supported when mounted only inside the target. Use an inactive, trusted tree and do not change its mounts concurrently.
+The sandbox isolates mount, PID, network, IPC, and UTS namespaces; uses a private `/dev`, read-only `/proc`, empty `/sys`, temporary `/run` and `/tmp`; restricts capabilities; and makes maple’s database read-only. Runtime mount points must be real directories. Filesystems mounted below the target are rejected if the same device is also mounted outside it. Dedicated target partitions such as `/boot` are supported when mounted only inside the target. Use an inactive, trusted tree and do not change its mounts concurrently.
 
 Offline initramfs generation enumerates target `/usr/lib/modules` directories and runs target dracut with `--force --no-hostonly --no-hostonly-cmdline --kver VERSION`. It never selects the host’s running kernel. Mount the target’s boot partitions first. Missing kernels, tools, namespace support, or failed commands produce errors; sandbox startup failures leave maintenance pending. Target filesystems are flushed after successful offline maintenance.
 
@@ -319,14 +319,14 @@ target/release/arch-to-maple example.pkg.tar.zst \
   'repository/packages/example/1:2.0-1.maple' > entry.toml
 ```
 
-Choose the output name to match the original `.PKGINFO` version. The destination must not exist. The converter stages decompressed tar data, streams a new xz archive, and validates it through Maple’s package loader before publishing it. Standard output contains a repository entry and SHA-256 table; merge entries into your index and combine checksum keys into **one** `[sha256]` table. Notices go to stderr.
+Choose the output name to match the original `.PKGINFO` version. The destination must not exist. The converter stages decompressed tar data, streams a new xz archive, and validates it through maple’s package loader before publishing it. Standard output contains a repository entry and SHA-256 table; merge entries into your index and combine checksum keys into **one** `[sha256]` table. Notices go to stderr.
 
 | Input feature | Translation or limitation |
 | --- | --- |
-| Name, version, description | Preserved as Maple metadata; versions use the same ALPM rules as native packages. |
+| Name, version, description | Preserved as maple metadata; versions use the same ALPM rules as native packages. |
 | Runtime/optional dependencies, provides, conflicts | Translated to corresponding tables; optional-dependency descriptions are omitted. |
 | Backup files | Become `config_files`. |
-| Files, modes, numeric ownership, symlinks, hard links, FIFOs/devices | Carried into the payload, subject to Maple’s validation and installation privileges. |
+| Files, modes, numeric ownership, symlinks, hard links, FIFOs/devices | Carried into the payload, subject to maple’s validation and installation privileges. |
 | Supported PAX xattrs, ACLs, capabilities | Preserved; fractional mtime is truncated and atime/ctime loss is reported. |
 | `.INSTALL` | Wrapped in six Bash lifecycle adapters; adds a `bash` dependency and requires trust at installation. |
 | Architecture, license, groups, build dependencies, provenance | Reported as omitted; architecture is not enforced. |
@@ -343,7 +343,7 @@ Conversion changes package format, not distribution ABI compatibility. Use archi
 
 1. **Open and recover.** Canonicalize the target root, acquire the database lock, and restore any interrupted file transaction before a modifying command proceeds.
 2. **Plan.** Read installed records and local metadata; fetch the repository index if needed. Resolve a compatible final set using metadata, then download only selected archives.
-3. **Validate.** Verify supplied hashes and index/archive agreement. Expand each xz archive once into temporary storage; validate paths, members, attributes, config declarations, hooks, and hard-link targets. Reject traversal, duplicates, Maple database paths, ownership conflicts, and unsupported file-type changes before mutation.
+3. **Validate.** Verify supplied hashes and index/archive agreement. Expand each xz archive once into temporary storage; validate paths, members, attributes, config declarations, hooks, and hard-link targets. Reject traversal, duplicates, maple database paths, ownership conflicts, and unsupported file-type changes before mutation.
 4. **Confirm and snapshot.** Check hook authorization and final dependencies, confirm the plan, and check available disk space. Back up affected files and installed records, then persist the active journal.
 5. **Apply.** Run all pre-hooks, change payloads and records, remove obsolete tracked paths, and run all post-hooks. Remove directories only when empty and unshared. A pre-commit failure restores the snapshot.
 6. **Commit and maintain.** Synchronize changed data and atomically rename the active journal to mark commitment. Retain rollback history, then execute the durable maintenance queue.
@@ -363,7 +363,7 @@ All paths below are relative to the selected root:
 
 Backups use streaming xz compression at level 1. Shared inodes are stored once without hard-linking backups to live files; older uncompressed backups remain readable. Restoration preserves supported attributes and links between backed-up paths, removing attributes introduced since the snapshot.
 
-An active journal means the file transaction must be undone; a committed journal means package files stay and pending maintenance must finish. Recovery can itself be retried after interruption. If restoration fails, Maple retains the backup and journal for another attempt. Keep the transaction directory intact.
+An active journal means the file transaction must be undone; a committed journal means package files stay and pending maintenance must finish. Recovery can itself be retried after interruption. If restoration fails, maple retains the backup and journal for another attempt. Keep the transaction directory intact.
 
 Repeated `rollback` walks backward through retained points and consumes each restored point. It restores affected files and records to their pre-operation state, including overwriting later local edits. Unrelated paths and arbitrary script effects are outside the snapshot. To repair an offline system, use a working binary with `--root /path/to/mounted-root recover`.
 
@@ -382,7 +382,7 @@ Transaction space checks cover affected filesystems, backups, and metadata headr
 - **Resolution:** no automatic conflict-driven removal, replacements, orphan cleanup, or solving around payload ownership collisions. Optional dependencies are informational and search has a finite branch limit.
 - **Compatibility:** ALPM ordering changes SemVer prerelease behavior. Arch conversion does not supply an ABI, a pacman compatibility environment, or global ALPM hooks.
 - **Filesystem coverage:** no directory-symlink traversal, live sockets, or automatic file/directory type replacement. Timestamps have second precision; hard links outside the backed-up set cannot be restored.
-- **Rollback scope:** file transactions are recoverable, not atomic filesystem snapshots. Running applications can see intermediate changes. Arbitrary script effects and generated maintenance state are not fully reversible. Recovery depends on intact backups and filesystem synchronization; Maple is not a full-system backup tool.
+- **Rollback scope:** file transactions are recoverable, not atomic filesystem snapshots. Running applications can see intermediate changes. Arbitrary script effects and generated maintenance state are not fully reversible. Recovery depends on intact backups and filesystem synchronization; maple is not a full-system backup tool.
 - **Offline execution:** requires Bubblewrap, Linux namespaces, and working target tools. Hardware-specific maintenance and a complete Mercury boot require separate validation.
 
 ## Development
